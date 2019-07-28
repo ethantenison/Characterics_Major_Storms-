@@ -1,0 +1,54 @@
+---
+title: "Characteristics of Major Storms"
+author: "Ethan Tenison"
+date: "7/28/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(janitor)
+```
+
+# Title 
+
+##Synopsis 
+In this report we aim to analyze the effects of severe weather events in the United States. Every years, tornados, hurricans, and forest fires cause both public and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern.
+
+##Data Processing 
+
+```{r,data, cache=TRUE}
+data <- read.csv("repdata_data_StormData.csv.bz2")
+data <- clean_names(data)
+```
+First we read the data from the csv file. There are over 900,000 observations. 
+
+```{r}
+dim(data)
+```
+
+
+```{R}
+#Across the United States, which types of events are most harmful with respect 
+#to population health?
+pop_health <- select(data, evtype, fatalities, injuries)
+pop_health <- pop_health %>% group_by(evtype) %>% summarise(total_fatalities = 
+                                sum(fatalities), total_injuries = sum(injuries))
+
+pop_health <- arrange(pop_health, desc(total_fatalities))                 
+
+#Across the United States, which types of events have the greatest economic consequences?
+
+economic_cons <- select(data, evtype, propdmg, propdmgexp)
+economic_cons <- filter(economic_cons, propdmg != 0.00, propdmgexp != "", 
+                        propdmgexp != "-", propdmgexp != "?", propdmgexp != "+")
+
+```
+
+
+##Results 
+```{r }
+plot(pressure)
+```
+
