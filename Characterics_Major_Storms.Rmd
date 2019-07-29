@@ -12,12 +12,12 @@ library(janitor)
 library(ggplot2)
 ```
 
-# Title 
+# Characteristics of Major Meteorological Events 
 
-##Synopsis 
+## Synopsis 
 In this report we aim to analyze the effects of severe weather events in the United States. Every years, tornados, hurricans, and forest fires cause both public and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern.
 
-##Data Processing 
+## Data Processing 
 
 ```{r,data, cache=TRUE}
 data <- read.csv("repdata_data_StormData.csv.bz2")
@@ -46,7 +46,7 @@ top5_fatalities <- pop_health[1:5,]
 ```
 
 Many events did not have tangible costs. In addition, some values are missing. Observations with 0 cost or missing values have been removed. 
-```{r, Economic Costs cache= TRUE}
+```{r, Economic Costs, cache= TRUE}
 #Across the United States, which types of events have the greatest economic consequences?
 
 economic_cons <- select(data, evtype, propdmg, propdmgexp)
@@ -72,7 +72,7 @@ for (i in 1:length(economic_cons$propdmgexp)){
 ```
 
 
-```{r Economic Costs cont.}
+```{r, Economic Costs cont.}
 
 economic_conse <- economic_cons %>% group_by(evtype) %>%  
         summarise(total_property_damage = sum(propdmg))
@@ -80,21 +80,23 @@ economic_conse <- economic_cons %>% group_by(evtype) %>%
 economic_conse <- add_row(economic_conse, evtype = "FLOOD RELATED", total_property_damage =144657709800+16140811860)
 
 economic_conse <- filter(economic_conse, evtype != "FLOOD", evtype != "FLASH FLOOD")
+
+economic_conse <- transmute(economic_conse, evtype, total_property_damage = total_property_damage/1000000000)
 economic_conse <- arrange(economic_conse, desc(total_property_damage)) 
 
 top5_propdm <- economic_conse[1:5,]
 ```
 
-##Results 
+## Results 
 For analysis purposes, I combined the values for "HEAT" and "EXCESSIVE HEAT". Tornados cause by far the greatest number of fatalities -almost double heat related deaths. 
 
 ```{r }
-fatalities <- ggplot(top5_fatalities, aes(x= reorder(evtype, -total_fatalities), total_fatalities)) + geom_bar(stat = "identity", aes(fill = evtype)) + labs(title = "Top 5 Causes of Meteorlogical Fatalities in the United States", x = "Event", y = "Total Fatalities") + theme(legend.position = "none")
+fatalities <- ggplot(top5_fatalities, aes(x= reorder(evtype, -total_fatalities), total_fatalities)) + geom_bar(stat = "identity", aes(fill = evtype)) + labs(title = "Top 5 Causes of Meteorological Fatalities in the United States", subtitle = "Number of Fatalities from 1950 to 2011", x = "Event", y = "Total Fatalities") + theme(legend.position = "none")
 fatalities
 ```
 For this analysis I had to combine "FLOOD" and "FLASH FLOOD". Floods and hurricanes are the most expensive natural disasters. 
 ```{r}
-property_damage <- ggplot(top5_propdm, aes(x=reorder(evtype, -total_property_damage), total_property_damage)) + geom_bar(stat = "identity", aes(fill = evtype), size=  10)+ labs(title = "Top 5 Most Costly Meteorlogical Events in the United States", x = "Event", y = "Total Cost ($)") + theme(legend.position = "none") + coord_flip()
+property_damage <- ggplot(top5_propdm, aes(x=reorder(evtype, -total_property_damage), total_property_damage)) + geom_bar(stat = "identity", aes(fill = evtype), size=  10)+ labs(title = "Top 5 Most Costly Meteorological Events in the United States", subtitle = "Total cost natural disasters from 1950 to 2011", x = "Event", y = "Total Cost ($Billions)") + theme(legend.position = "none") + coord_flip()
 
 options(scipen=999)
 property_damage
