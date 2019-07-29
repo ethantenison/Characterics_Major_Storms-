@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(janitor)
+library(ggplot2)
 ```
 
 # Title 
@@ -29,26 +30,60 @@ dim(data)
 ```
 
 
-```{R}
+```{R, Public Health}
 #Across the United States, which types of events are most harmful with respect 
 #to population health?
 pop_health <- select(data, evtype, fatalities, injuries)
 pop_health <- pop_health %>% group_by(evtype) %>% summarise(total_fatalities = 
-                                sum(fatalities), total_injuries = sum(injuries))
+                                sum(fatalities), total_injuries = sum(injuries)
+                                )
 
-pop_health <- arrange(pop_health, desc(total_fatalities))                 
+pop_health <- add_row(pop_health, evtype = "HEAT RELATED", total_fatalities = 	
+                        1903 + 937)
+pop_health <- filter(pop_health, evtype != "HEAT", evtype != "EXCESSIVE HEAT")
+pop_health <- arrange(pop_health, desc(total_fatalities))
+top5_fatalities <- pop_health[1:5,]
+```
 
+Many events did not have tangible costs. In addition, some values are missing. Observations with 0 cost or missing values have been removed. 
+```{r, Economic Costs cache= TRUE}
 #Across the United States, which types of events have the greatest economic consequences?
 
 economic_cons <- select(data, evtype, propdmg, propdmgexp)
 economic_cons <- filter(economic_cons, propdmg != 0.00, propdmgexp != "", 
                         propdmgexp != "-", propdmgexp != "?", propdmgexp != "+")
 
+for (i in 1:length(economic_cons$propdmgexp)){
+        if (economic_cons$propdmgexp[i] == "H"){        
+        economic_cons$propdmg[i] <- economic_cons$propdmg[i]*100               
+        }
+        else if(economic_cons$propdmgexp[i] == "K"){        
+        economic_cons$propdmg[i] <- economic_cons$propdmg[i]*1000               
+        }
+        else if(economic_cons$propdmgexp[i] == "M"){        
+        economic_cons$propdmg[i] <- economic_cons$propdmg[i]*1000000               
+        } 
+        else if(economic_cons$propdmgexp[i] == "B"){        
+        economic_cons$propdmg[i] <- economic_cons$propdmg[i]*1000000000               
+        } 
+}
+
+
 ```
 
 
+```{r Economic Costs cont.}
+economic_cons <- economic_cons %>% group_by(evtype) %>%  
+        summarise(total_property_damage = sum(propdmg))
+
+economic_cons <- arrange(economic_cons, desc(total_property_damage)) 
+
+top5_propdm <- economic_cons[1:5,]
+```
+
 ##Results 
 ```{r }
-plot(pressure)
+fatalities <- ggplot(top5_fatalities, aes(x= reorder(evtype, -total_fatalities), total_fatalities)) + geom_bar(stat = "identity", aes(fill = evtype)) + labs(title = "Top 5 Causes of Meteorlogical Fatalities in the United States", x = "Event", y = "Total Fatalities") + theme(legend.title = element_blank())
+fatalities
 ```
 
