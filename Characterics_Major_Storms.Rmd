@@ -89,7 +89,7 @@ top5_propdm <- economic_conse[1:5,]
 For analysis purposes, I combined the values for "HEAT" and "EXCESSIVE HEAT". Tornados cause by far the greatest number of fatalities -almost double heat related deaths. 
 
 ```{r }
-fatalities <- ggplot(top5_fatalities, aes(x= reorder(evtype, -total_fatalities), total_fatalities)) + geom_bar(stat = "identity", aes(fill = evtype)) + labs(title = "Top 5 Causes of Meteorlogical Fatalities in the United States", x = "Event", y = "Total Fatalities") + theme(legend.title = element_blank())
+fatalities <- ggplot(top5_fatalities, aes(x= reorder(evtype, -total_fatalities), total_fatalities)) + geom_bar(stat = "identity", aes(fill = evtype)) + labs(title = "Top 5 Causes of Meteorlogical Fatalities in the United States", x = "Event", y = "Total Fatalities") + theme(legend.position = "none")
 fatalities
 ```
 For this analysis I had to combine "FLOOD" and "FLASH FLOOD". Floods and hurricanes are the most expensive natural disasters. 
